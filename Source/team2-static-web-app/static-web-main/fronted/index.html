@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로드투에어</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css" rel="stylesheet" />
+
+
+    <style>
+        /* --- New Color Palette --- */
+        :root {
+            --main-teal: #01AAB5;
+            --sub-deep-blue: #013780;
+            --sub-action-blue: #006EEA;
+            --neutral-white: #FFFFFF;
+            --neutral-light-gray: #f0f2f5;
+        }
+
+        /* --- Base & Background --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            height: 100vh;
+            background-color: #333;
+        }
+
+        #bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        #background {
+            width: 110%;
+            height: 110%;
+            object-fit: cover;
+            position: absolute;
+            top: -5%;
+            left: -5%;
+            filter: blur(4px) brightness(0.5);
+            transform: translate(0, 0);
+            transition: transform 0.2s linear;
+        }
+
+        /* --- Main Content Container --- */
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 0.8s ease-out forwards;
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+            z-index: 1;
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: perspective(1000px) translateY(20px) rotateX(-5deg);
+            }
+            to {
+                opacity: 1;
+                transform: perspective(1000px) translateY(0) rotateX(0);
+            }
+        }
+
+        .card-image {
+            width: calc(100% + 80px);
+            margin: -40px -40px 30px -40px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 24px 24px 0 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* 로고 이미지 스타일 - 500x500 정사각형에 최적화 */
+        .logo-container {
+            margin-top:-30px;
+            margin-bottom:10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-right: 40px;
+        }
+
+        .logo-image {
+            width: 320px;  /* 500x500 이미지를 200px로 축소 */
+            height: 150px; /* 정사각형 비율 유지 */
+            max-width: 100%;
+            object-fit: contain;
+            filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.15));
+            transition: all 0.3s ease;
+            background: transparent; /* 투명 배경 확실히 */
+        }
+
+        .logo-image:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.2));
+        }
+
+        @media (max-width: 480px) {
+            .logo-container {
+                margin-top: 5px;     /* ✅ 위쪽 여백 최소화 */
+                margin-bottom: 24px;  /* ✅ 아래는 보기 좋게 유지 */
+            }
+        
+            .logo-image {
+                width: 240px;
+                height: auto;
+                max-width: 90%;
+            }
+        
+            .container {
+                padding: 40px 24px;   /* ✅ 전체 카드 여백도 줄임 (기존 60px → 40px) */
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .logo-container {
+                margin-top: 3px;
+                margin-bottom: 20px;
+            }
+        
+            .logo-image {
+                width: 200px;
+                height: auto;
+                max-width: 90%;
+            }
+        
+            .container {
+                padding: 36px 16px;
+            }
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 18px;
+            font-size: 17px;
+            font-weight: 700;
+            color: white;
+            background: var(--main-teal);
+            border: none;
+            border-radius: 16px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(1, 170, 181, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(1, 170, 181, 0.3);
+            filter: brightness(1.05);
+        }
+
+        .btn:active {
+            transform: translateY(0px);
+            filter: brightness(1);
+        }
+        
+        /* Language Selector Styles */
+        .top-right-lang {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .lang-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .lang-icon:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .lang-icon.active {
+            box-shadow: 0 0 0 3px var(--main-teal);   
+        }
+        /* 모바일 최적화 추가 스타일 */
+
+        /* 전체 컨테이너 모바일 최적화 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                min-height: 100vh;
+                height: auto;
+            }
+        
+            .container {
+                padding: 32px 20px;
+                margin: 10px;
+                max-width: calc(100vw - 20px);
+                width: calc(100% - 20px);
+                border-radius: 20px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            }
+        }
+        
+        /* 카드 이미지 모바일 최적화 */
+        @media (max-width: 768px) {
+            .card-image {
+                width: calc(100% + 40px);
+                margin: -32px -20px 24px -20px;
+                height: 160px;
+                border-radius: 20px 20px 0 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card-image {
+                height: 140px;
+            }
+        }
+        
+        /* 언어 선택 버튼 모바일 최적화 */
+        @media (max-width: 768px) {
+            .top-right-lang {
+                top: 15px;
+                right: 15px;
+                gap: 6px;
+            }
+        
+            .lang-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+            }
+        
+            .lang-icon img {
+                width: 20px !important;
+                height: auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .top-right-lang {
+                top: 12px;
+                right: 12px;
+                gap: 4px;
+            }
+        
+            .lang-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 18px;
+            }
+        
+            .lang-icon img {
+                width: 18px !important;
+            }
+        }
+        
+        /* 버튼 그룹 모바일 최적화 */
+        @media (max-width: 768px) {
+            .button-group {
+                gap: 12px;
+                margin-top: 8px;
+            }
+        
+            .btn {
+                padding: 16px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 14px;
+                box-shadow: 0 3px 12px rgba(1, 170, 181, 0.2);
+            }
+        
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(1, 170, 181, 0.3);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .button-group {
+                gap: 10px;
+                margin-top: 4px;
+            }
+        
+            .btn {
+                padding: 14px 16px;
+                font-size: 15px;
+                font-weight: 600;
+                border-radius: 12px;
+                gap: 8px;
+            }
+        
+            .btn i {
+                font-size: 16px;
+            }
+        }
+        
+        /* 작은 화면 (360px 이하) 추가 최적화 */
+        @media (max-width: 360px) {
+            .container {
+                padding: 28px 16px;
+                margin: 8px;
+                max-width: calc(100vw - 16px);
+                width: calc(100% - 16px);
+                border-radius: 16px;
+            }
+        
+            .card-image {
+                width: calc(100% + 32px);
+                margin: -28px -16px 20px -16px;
+                height: 120px;
+                border-radius: 16px 16px 0 0;
+            }
+        
+            .top-right-lang {
+                top: 10px;
+                right: 10px;
+                gap: 3px;
+            }
+        
+            .lang-icon {
+                width: 26px;
+                height: 26px;
+                font-size: 16px;
+            }
+        
+            .lang-icon img {
+                width: 16px !important;
+            }
+        
+            .btn {
+                padding: 12px 14px;
+                font-size: 14px;
+                gap: 6px;
+            }
+        
+            .btn i {
+                font-size: 14px;
+            }
+        }
+        
+        /* 터치 디바이스 최적화 */
+        @media (hover: none) and (pointer: coarse) {
+            .btn:hover {
+                transform: none;
+                box-shadow: 0 4px 15px rgba(1, 170, 181, 0.2);
+            }
+        
+            .btn:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+        
+            .lang-icon:hover {
+                transform: none;
+            }
+        
+            .lang-icon:active {
+                transform: scale(0.95);
+                transition: transform 0.1s ease;
+            }
+        }
+        @media (max-width: 768px) {
+            html, body {
+                overflow: hidden;      /* 스크롤 방지 */
+                height: 100vh;         /* 화면 높이 고정 */
+                position: fixed;       /* 위치 고정 */
+                width: 100%;
+            }
+        
+            body {
+                display: flex;         /* 플렉스 레이아웃 */
+                justify-content: center; /* 수평 중앙 */
+                align-items: flex-start;   /* 수직 중앙 */
+                margin: 0;
+                padding-top: 8vh;
+            }
+        
+            .container {
+                max-height: calc(100vh - 20px); /* 화면 높이 제한 */
+                overflow-y: auto; 
+                transform: translateY(-30vh);
+            }
+        }
+            
+        
+        /* 가로 모드 최적화 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .container {
+                padding: 24px 20px;
+                margin: 8px;
+            }
+        
+            .card-image {
+                height: 100px;
+                margin-bottom: 16px;
+            }
+        
+            .logo-container {
+                margin-top: -20px;
+                margin-bottom: 8px;
+            }
+        
+            .logo-image {
+                width: 200px;
+                height: auto;
+            }
+        
+            .button-group {
+                gap: 8px;
+                margin-top: 0;
+            }
+        
+            .btn {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+        
+        /* 초소형 디바이스 (320px 이하) */
+        @media (max-width: 320px) {
+            body {
+                padding: 5px;
+            }
+        
+            .container {
+                padding: 24px 12px;
+                margin: 5px;
+                max-width: calc(100vw - 10px);
+                width: calc(100% - 10px);
+            }
+        
+            .card-image {
+                width: calc(100% + 24px);
+                margin: -24px -12px 16px -12px;
+                height: 100px;
+            }
+        
+            .logo-image {
+                width: 180px;
+                height: auto;
+            }
+        
+            .top-right-lang {
+                top: 8px;
+                right: 8px;
+                gap: 2px;
+            }
+        
+            .lang-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 14px;
+            }
+        
+            .lang-icon img {
+                width: 14px !important;
+            }
+        
+            .btn {
+                padding: 10px 12px;
+                font-size: 13px;
+                gap: 5px;
+            }
+        
+            .btn i {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background container -->
+    <div id="bg-container">
+        <img id="background" src="배경.jpg" 공항 배경">
+    </div>
+
+    <!-- Main content container -->
+    <div class="container" id="content-container">
+
+        <div class="top-right-lang">
+            <div class="lang-icon" data-lang="ko" onclick="changeLanguage('ko')">
+            <img src="flags/kr.png" alt="Korean" width="24">
+            </div>
+            <div class="lang-icon" data-lang="en" onclick="changeLanguage('en')">
+            <img src="flags/us.png" alt="English" width="24">
+            </div>
+            <div class="lang-icon" data-lang="ja" onclick="changeLanguage('ja')">
+            <img src="flags/jp.png" alt="Japanese" width="24">
+            </div>
+            <div class="lang-icon" data-lang="zh" onclick="changeLanguage('zh')">
+            <img src="flags/cn.png" alt="Chinese" width="24">
+            </div>
+            <div class="lang-icon" data-lang="es" onclick="changeLanguage('es')">
+            <img src="flags/es.png" alt="Spanish" width="24">
+            </div>
+        </div>
+
+        <img src="https://www.airport.kr/sites/co_ko/atchmnfl/bbs/90/thumbnail/20240619110736378_0.jpg" alt="Airplane Wing View" class="card-image">
+
+        <!-- 로고 이미지로 교체 -->
+        <div class="logo-container">
+            <img src="logo.png" alt="ROAD 2 AIR" class="logo-image">
+        </div>
+        
+        <div class="button-group">
+            <a href="chatbot.html" class="btn" data-lang-key="btn_ai_guide"><i class="fas fa-robot"></i> AI 챗봇 서비스</a>
+            <a href="https://app.powerbi.com/view?r=eyJrIjoiN2VkN2I2NzMtMzk2Ny00OGQxLThmMDAtOGI3YjBjODQzYmU3IiwidCI6IjhmOTE5MDBlLWRmZTUtNDgwYS05YTkyLTU2MjM5Zjk4OTQ1NCJ9&pageName=4d9b61018d80796e5cee" class="btn" data-lang-key="btn_data_report"><i class="fas fa-chart-bar"></i> 실시간 리포트</a>
+            <a href="navigation.html" class="btn" data-lang-key="btn_navigation"><i class="fas fa-map-location-dot"></i> 공항 길찾기</a>
+            <a href="delay.html" class="btn" data-lang-key="btn_delay"><i class='fas fa-clock'></i> 지연 항공 목록</a>
+        </div>
+        
+    </div>
+
+    <script>
+        // --- Language Translation Script ---
+        const translations = {
+            'ko': {
+                'main_title': 'ROAD 2 AIR',
+                'btn_ai_guide': '<i class="fas fa-robot"></i> AI 챗봇 서비스',
+                'btn_navigation': '<i class="fas fa-map-location-dot"></i> 공항 길찾기',
+                'btn_data_report': '<i class="fas fa-chart-bar"></i> 데이터 리포트',
+                'btn_delay': '<i class="fas fa-clock"></i> 지연 항공 목록'
+            },
+            'en': {
+                'main_title': 'ROAD 2 AIR',
+                'btn_ai_guide': '<i class="fas fa-robot"></i> AI ChatBot Service',
+                'btn_navigation': '<i class="fas fa-map-location-dot"></i> Airport Navigation',
+                'btn_data_report': '<i class="fas fa-chart-bar"></i> Data Report',
+                'btn_delay': '<i class="fas fa-clock"></i> List of delayed flights'
+            },
+            'ja': {
+                'main_title': 'ROAD 2 AIR',
+                'btn_ai_guide': '<i class="fas fa-robot"></i> AI案内サービス',
+                'btn_navigation': '<i class="fas fa-map-location-dot"></i> 空港経路案内',
+                'btn_data_report': '<i class="fas fa-chart-bar"></i> データレポート',
+                'btn_delay': '<i class="fas fa-clock"></i> 遅延航空機リスト'
+            },
+            'zh': {
+                'main_title': 'ROAD 2 AIR',
+                'btn_ai_guide': '<i class="fas fa-robot"></i> AI指南服务',
+                'btn_navigation': '<i class="fas fa-map-location-dot"></i> 机场导航',
+                'btn_data_report': '<i class="fas fa-chart-bar"></i> 数据报告',
+                'btn_delay': '<i class="fas fa-clock"></i> 延迟航空列表'
+            },
+            'es': {
+                'main_title': 'ROAD 2 AIR',
+                'btn_ai_guide': '<i class="fas fa-robot"></i> Servicio de Guía IA',
+                'btn_navigation': '<i class="fas fa-map-location-dot"></i> Navegación Aeroportuaria',
+                'btn_data_report': '<i class="fas fa-chart-bar"></i> Informe de Datos',
+                'btn_delay': '<i class="fas fa-clock"></i> Anexos:Aerolíneas Retrasadas'
+            }
+        };
+
+        function changeLanguage(lang) {
+            // Update all elements with data-lang-key attribute
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang] && translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            
+            // Update active state on buttons
+            document.querySelectorAll('.lang-icon').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.lang-icon[data-lang='${lang}']`).classList.add('active');
+
+            // Save language preference
+            localStorage.setItem('airport-lang', lang);
+            
+            // Update links to carry over the language preference
+            updateLinks(lang);
+        }
+        
+        function updateLinks(lang) {
+            document.querySelectorAll('a.btn').forEach(link => {
+                const originalHref = link.getAttribute('href');
+                if (!originalHref || originalHref === '#') return;
+        
+                // 외부 링크일 경우 제외 (Power BI 등)
+                const isExternal = originalHref.startsWith('http://') || originalHref.startsWith('https://');
+                if (isExternal) return;
+        
+                // 내부 링크인 경우에만 lang 파라미터 추가
+                const url = new URL(originalHref, window.location.origin);
+                url.searchParams.set('lang', lang);
+                link.setAttribute('href', url.pathname + url.search);
+            });
+        }
+
+        // On page load, check for saved language
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('airport-lang') || 'ko';
+            changeLanguage(savedLang);
+        });
+
+    </script>
+</body>
+</html>

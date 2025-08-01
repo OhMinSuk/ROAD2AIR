@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인천공항 네비게이션</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- New Color Palette --- */
+        :root {
+            --main-teal: #01AAB5;
+            --sub-deep-blue: #013780;
+            --sub-action-blue: #006EEA;
+            --neutral-light-gray: #ECEDEF;
+            --neutral-bg-gray: #f0f2f5;
+            --neutral-white: #FFFFFF;
+            --text-dark: #2c3e50;
+        }
+
+        /* --- Base & Background --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--neutral-bg-gray);
+            background-image:
+                linear-gradient(rgba(1, 170, 181, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(1, 170, 181, 0.07) 1px, transparent 1px);
+            background-size: 25px 25px;
+            min-height: 100vh;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* --- Language Selector (Mobile Optimized) --- */
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lang-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--neutral-white);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            border: 2px solid transparent;
+            min-width: 36px;
+            flex-shrink: 0;
+        }
+
+        .lang-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .lang-icon.active {
+            border-color: var(--main-teal);
+        }
+
+        /* --- Main Container (Mobile Optimized) --- */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--neutral-white);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 1;
+            animation: fadeInFromBottom 0.8s ease-out forwards;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--main-teal), var(--sub-action-blue), var(--sub-deep-blue));
+        }
+
+        @keyframes fadeInFromBottom {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Header (Mobile Optimized) --- */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            color: var(--sub-deep-blue);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 800;
+            flex-wrap: wrap;
+        }
+
+        .header h1 i {
+            color: var(--main-teal);
+            font-size: 1.2em;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 0.95em;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* --- Navigation Tabs (Mobile Optimized) --- */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-radius: 50px;
+            border: 2px solid var(--neutral-light-gray);
+            background: var(--neutral-light-gray);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9em;
+            min-width: 120px;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            border-color: var(--main-teal);
+        }
+
+        .nav-tab.active {
+            background: var(--main-teal);
+            color: var(--neutral-white);
+            border-color: var(--main-teal);
+        }
+
+        /* --- Tab Content --- */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .tab-content h2 {
+            font-size: 1.5em;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+        .tab-content > p {
+            font-size: 1em;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* --- UI Elements (Mobile Optimized) --- */
+        .btn {
+            padding: 12px 24px;
+            background: var(--main-teal);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(1, 170, 181, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(1, 170, 181, 0.3);
+            filter: brightness(1.05);
+        }
+
+        .map-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            background: var(--neutral-light-gray);
+        }
+
+        .info-card {
+            background: var(--neutral-white);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            border: 1px solid var(--neutral-light-gray);
+            border-left: 4px solid var(--main-teal);
+        }
+
+        .info-card h3 {
+            color: var(--sub-deep-blue);
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 10px;
+            margin: 12px 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .status.success {
+            background: #e6f6f5;
+            color: #016a6e;
+        }
+
+        .status.error {
+            background: #fbebee;
+            color: #c62828;
+        }
+
+        .facility-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .facility-item {
+            background: var(--neutral-white);
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid var(--neutral-light-gray);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .facility-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .facility-item h4 {
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+        .facility-item p {
+            color: #7f8c8d;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .distance-info {
+            background: var(--main-teal);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-weight: 700;
+        }
+
+        .spinner {
+            border: 3px solid var(--neutral-light-gray);
+            border-top: 3px solid var(--main-teal);
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .manual-location-group {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .manual-btn {
+            background: var(--neutral-white);
+            color: var(--text-dark);
+            border: 2px solid var(--neutral-light-gray);
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 10px 12px;
+        }
+
+        .manual-btn:hover {
+            background: var(--neutral-light-gray);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 모바일에서 2열로 버튼 배치 */
+        #manual-location-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 8px;
+        }
+
+        /* --- Tablet Responsive (768px+) --- */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .container {
+                padding: 30px;
+                border-radius: 20px;
+            }
+
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .header p {
+                font-size: 1.05em;
+            }
+
+            .nav-tab {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+
+            .tab-content h2 {
+                font-size: 1.7em;
+            }
+
+            .tab-content > p {
+                font-size: 1.05em;
+            }
+
+            .btn {
+                width: auto;
+                padding: 14px 28px;
+                font-size: 16px;
+            }
+
+            .map-container {
+                height: 400px;
+                border-radius: 16px;
+            }
+
+            .facility-list {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 20px;
+            }
+
+            /* 태블릿에서는 flex로 변경하여 중앙 정렬 */
+            #manual-location-buttons {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .manual-btn {
+                width: 200px;
+                margin: 6px;
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+        }
+
+        /* --- Desktop Responsive (1024px+) --- */
+        @media (min-width: 1024px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .tab-content h2 {
+                font-size: 1.8em;
+            }
+
+            .tab-content > p {
+                font-size: 1.1em;
+            }
+
+            .btn {
+                padding: 15px 30px;
+            }
+
+            .map-container {
+                height: 450px;
+            }
+
+            .facility-list {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+
+            .manual-btn {
+                width: 220px;
+                font-size: 15px;
+                padding: 12px 24px;
+            }
+        }
+
+        /* --- Small Mobile (320px-480px) --- */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+                gap: 8px;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .nav-tab {
+                padding: 8px 16px;
+                font-size: 0.85em;
+                min-width: 100px;
+            }
+
+            .tab-content h2 {
+                font-size: 1.3em;
+            }
+
+            .tab-content > p {
+                font-size: 0.95em;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .map-container {
+                height: 250px;
+            }
+
+            .lang-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .language-selector {
+                gap: 6px;
+                padding: 5px;
+            }
+
+            /* 작은 모바일에서도 2열 유지 */
+            #manual-location-buttons {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+
+            .manual-btn {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-selector">
+        <div class="lang-icon" data-lang="ko" onclick="changeLanguage('ko')">🇰🇷</div>
+        <div class="lang-icon" data-lang="en" onclick="changeLanguage('en')">🇺🇸</div>
+        <div class="lang-icon" data-lang="ja" onclick="changeLanguage('ja')">🇯🇵</div>
+        <div class="lang-icon" data-lang="zh" onclick="changeLanguage('zh')">🇨🇳</div>
+        <div class="lang-icon" data-lang="es" onclick="changeLanguage('es')">🇪🇸</div>
+    </div>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-map-location-dot"></i> 인천공항 네비게이션</h1>
+            <p>스마트한 공항 안내 시스템</p>
+        </div>
+
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="route"><i class="fas fa-route"></i> 공항 가는 길</div>
+            <div class="nav-tab" data-tab="airport"><i class="fas fa-walking"></i> 공항 내 안내</div>
+        </div>
+
+        <div id="route-tab" class="tab-content active">
+            <h2>인천공항까지 최적 경로</h2>
+            <p>현재 위치를 기반으로 인천공항까지의 교통편과 소요 시간을 안내해 드립니다.</p>
+            <button class="btn" onclick="getRouteToAirport()"><i class="fas fa-location-arrow"></i> 현재 위치에서 길찾기</button>
+            <div id="route-status" style="margin-top: 20px;"></div>
+            <div id="route-info"></div>
+        </div>
+
+        <div id="airport-tab" class="tab-content">
+            <h2>공항 내부 길찾기</h2>
+            <p>공항 내 현재 위치를 설정하고, 주변 시설까지의 거리와 도보 시간을 확인하세요.</p>
+            
+            <button class="btn" onclick="getCurrentLocation()"><i class="fas fa-street-view"></i> GPS로 현재 위치 확인</button>
+            <div id="location-status" style="margin-top: 20px;"></div>
+
+            <div class="manual-location-group">
+                <p style="text-align: center; font-weight: 500; margin-bottom: 15px;">또는, 지도에서 가장 가까운 장소를 선택하세요.</p>
+                 <div id="manual-location-buttons"></div>
+            </div>
+
+            <div class="map-container">
+                <div id="airport-map" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #7f8c8d; font-weight: 700; text-align: center;">
+                    <i class="fas fa-map-marked-alt" style="font-size: 48px; margin-bottom: 20px; display: block; color: var(--main-teal);"></i>
+                    <br>위치 확인 후 지도가 표시됩니다
+                </div>
+            </div>
+
+            <h3><i class="fas fa-store" style="color: var(--main-teal);"></i> 주변 주요 시설</h3>
+            <div id="facility-list" class="facility-list"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentLocation = null;
+        let currentLang = 'ko'; // 언어 변수 추가
+
+        function updateDisplayedRoutes() {
+            // route-info에 내용이 있다면 (길찾기 결과가 표시된 상태)
+            const routeInfo = document.getElementById('route-info');
+            if (routeInfo && routeInfo.innerHTML.trim() !== '') {
+                // 현재 저장된 위치 정보로 다시 길찾기 실행
+                if (typeof getRouteToAirport === 'function') {
+                    getRouteToAirport();
+                }
+            }
+        }
+
+        // Function to update all text based on current language
+        function updateTexts() {
+            document.querySelector('.header h1').innerHTML = `<i class="fas fa-map-location-dot"></i> ${translations[currentLang]['header_title']}`;
+            document.querySelector('.header p').textContent = translations[currentLang]['header_subtitle'];
+            
+            document.querySelector('.nav-tab[data-tab="route"]').innerHTML = `<i class="fas fa-route"></i> ${translations[currentLang]['route_tab_text']}`;
+            document.querySelector('.nav-tab[data-tab="airport"]').innerHTML = `<i class="fas fa-walking"></i> ${translations[currentLang]['airport_tab_text']}`;
+
+            // Route tab texts
+            document.querySelector('#route-tab h2').textContent = translations[currentLang]['route_heading'];
+            document.querySelector('#route-tab p').textContent = translations[currentLang]['route_description'];
+            document.querySelector('#route-tab .btn').innerHTML = `<i class="fas fa-location-arrow"></i> ${translations[currentLang]['find_route_btn']}`;
+
+            // Airport tab texts
+            document.querySelector('#airport-tab h2').textContent = translations[currentLang]['airport_heading'];
+            document.querySelector('#airport-tab p').textContent = translations[currentLang]['airport_description'];
+            document.querySelector('#airport-tab .btn').innerHTML = `<i class="fas fa-street-view"></i> ${translations[currentLang]['get_gps_location']}`;
+            document.querySelector('.manual-location-group p').textContent = translations[currentLang]['manual_location_prompt'];
+            document.getElementById('airport-map').innerHTML = translations[currentLang]['map_placeholder'];
+            document.querySelector('#airport-tab h3').innerHTML = `<i class="fas fa-store" style="color: var(--main-teal);"></i> ${translations[currentLang]['nearby_facilities_heading']}`;
+
+            // Re-render manual buttons and facility list after language change
+            populateManualButtons();
+            updateFacilityList();
+            if (currentLocation) { // If location is set, update map display too
+                updateAirportMap();
+            }
+            
+            // ✅ 추가: 이미 표시된 경로 정보들을 다시 렌더링
+            updateDisplayedRoutes();
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang; // Set HTML lang attribute
+            updateTexts(); // Update all static texts
+
+            ['route-status', 'route-info', 'route-info-display'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.innerHTML = '';
+                }
+            });
+
+            document.querySelectorAll('.lang-icon').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.lang-icon[data-lang='${lang}']`).classList.add('active');
+            localStorage.setItem('airport-lang', lang);
+        }
+
+        function populateManualButtons() {
+            const buttonContainer = document.getElementById('manual-location-buttons');
+            buttonContainer.innerHTML = airportFacilities.slice(0, 6).map(f => 
+                `<button class="btn manual-btn" onclick="setLocation(${f.lat}, ${f.lng}, '${f.name[currentLang] || f.name.ko}')">
+                    ${f.name[currentLang] || f.name.ko}
+                </button>`
+            ).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('airport-lang') || 'ko';
+            changeLanguage(savedLang); // Apply saved language or default to Korean
+
+            updateFacilityList();
+            populateManualButtons();
+        });
+    </script>
+    <script src="/js/translations.js"></script>
+    <script src="/js/facilities.js"></script>
+    <script src="/js/navigation.js"></script>
+</body>
+</html>

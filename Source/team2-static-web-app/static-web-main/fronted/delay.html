@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지연 항공 목록</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- New Color Palette --- */
+        :root {
+            --main-teal: #01AAB5;
+            --sub-deep-blue: #013780;
+            --sub-action-blue: #006EEA;
+            --sub-light-blue: #0881EE;
+            --neutral-light-gray: #ECEDEF;
+            --neutral-bg-gray: #f0f2f5;
+            --neutral-white: #FFFFFF;
+            --text-dark: #2c3e50;
+            --text-gray: #7f8c8d; /* 추가: 텍스트 회색 */
+            --error-red: #c0392b; /* 추가: 에러 메시지 빨강 */
+        }
+
+        /* --- Base & Background --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+            
+        body {
+            background-color: var(--neutral-bg-gray);
+            background-image:
+                linear-gradient(rgba(1, 170, 181, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(1, 170, 181, 0.07) 1px, transparent 1px);
+            background-attachment: fixed;
+            background-size: 25px 25px;
+            min-height: 100vh;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            line-height: 1.6;
+            font-family: 'Pretendard', sans-serif; /* 폰트 적용 */
+            color: var(--text-dark); /* 기본 텍스트 색상 */
+        }
+
+
+        /* --- New Page Wrapper --- */
+        .page-wrapper {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        /* --- Language Selector (Moved) --- */
+        .language-selector {
+            display: flex;
+            gap: 12px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .lang-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--neutral-white);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            border: 2px solid transparent;
+        }
+
+        .lang-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .lang-icon.active {
+            border-color: var(--main-teal);
+        }
+
+        /* --- Main Container --- */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 50px;
+            margin: 0 auto;
+            background: var(--neutral-white);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+            z-index: 1;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--main-teal), var(--sub-action-blue), var(--sub-deep-blue));
+        }
+
+        @keyframes fadeInUp { /* keyframe 이름 통일 */
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--main-teal), var(--sub-action-blue));
+            border-radius: 2px;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--sub-deep-blue);
+            margin-bottom: 12px;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        
+        .header .subtitle {
+            color: var(--text-gray);
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        
+        /* --- Status Indicator --- */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding: 16px 24px;
+            background: #e6f6f5;
+            border-radius: 20px;
+            color: #016a6e;
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            font-weight: 600;
+            border: 1px solid rgba(1, 170, 181, 0.2);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--main-teal);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(1, 170, 181, 0.7); 
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 0 8px rgba(1, 170, 181, 0); 
+                transform: scale(1.1);
+            }
+        }
+
+        /* --- Loading States --- */
+        .loading-state, .error-state, .no-data-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-gray);
+        }
+
+        .loading-state i {
+            font-size: 3rem;
+            color: var(--main-teal);
+            margin-bottom: 20px;
+        }
+
+        .error-state i {
+            font-size: 3rem;
+            color: var(--error-red);
+            margin-bottom: 20px;
+        }
+
+        .no-data-state {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* --- Flight List Grid --- */
+        .flight-list {
+            display: grid;
+            grid-template-columns: 1fr; /* 기본적으로 한 줄에 하나 */
+            gap: 20px; /* 카드 간 간격 */
+        }
+
+        /* --- Flight Card Styling (Revised) --- */
+        .flight-card {
+            background: var(--neutral-white);
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+            padding: 24px; /* 통일된 패딩 */
+            animation: fadeInUp 0.5s ease-out; /* keyframe 이름 통일 */
+        }
+
+        .flight-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .flight-airline-info {
+            flex: 1; /* 너비 조절 */
+        }
+
+        .flight-airline-name {
+            font-size: 1.5em; /* clamp 대신 em 사용 */
+            font-weight: 700;
+            color: var(--sub-deep-blue);
+        }
+
+        .flight-number {
+            font-size: 1.2em; /* clamp 대신 em 사용 */
+            color: var(--text-gray);
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-badge {
+            background: #ffe6e6; /* 기존 스타일 유지 */
+            color: var(--error-red); /* 기존 스타일 유지 */
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 1em; /* 수정: 1.5em -> 1em (기존 HTML보다 너무 커서 조절) */
+            white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+        }
+
+        .flight-details-grid {
+            display: flex; /* flexbox로 변경 */
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .detail-group {
+            flex: 1;
+            min-width: 140px; /* 목적지 그룹 최소 너비 */
+        }
+
+        .detail-group.align-right {
+            text-align: right;
+            min-width: 100px; /* 게이트 그룹 최소 너비 */
+        }
+
+        .detail-label {
+            font-size: 0.9em; /* clamp 대신 em 사용 */
+            color: var(--text-gray);
+            margin-bottom: 4px; /* 레이블과 값 사이 간격 */
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: 1.3em; /* clamp 대신 em 사용 */
+        }
+
+        .time-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 16px; /* 패딩 조절 */
+            border-radius: 12px; /* 둥근 모서리 조절 */
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .time-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .time-label-small {
+            font-size: 0.9em; /* clamp 대신 em 사용 */
+            color: var(--text-gray);
+        }
+
+        .time-value-large {
+            font-weight: 700;
+            font-size: 1.2em; /* clamp 대신 em 사용 */
+            font-family: 'Courier New', monospace;
+        }
+        
+        .delayed-time-value {
+            color: var(--error-red);
+        }
+
+        .delayed-time-value::before {
+            content: '⚠️';
+            margin-right: 6px;
+            font-size: 0.9em;
+        }
+
+        /* --- Footer --- */
+        .last-updated {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--neutral-light-gray);
+            color: var(--text-gray);
+            font-size: clamp(0.8rem, 1.2vw, 0.9rem);
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container { /* container-inner 대신 container */
+                padding: 24px;
+            }
+            
+            .flight-list {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .flight-card {
+                padding: 24px;
+            }
+            
+            .language-selector {
+                gap: 6px;
+                padding: 10px 12px;
+            }
+            
+            .lang-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container { /* container-inner 대신 container */
+                padding: 20px;
+            }
+            
+            .flight-card {
+                padding: 20px;
+            }
+            
+            .flight-card-header { /* flight-header 대신 flight-card-header */
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .status-badge {
+                align-self: flex-start;
+            }
+        }
+
+        /* --- Desktop Optimizations --- */
+        @media (min-width: 1200px) {
+            .container { /* container-inner 대신 container */
+                padding: 50px;
+            }
+            
+            .flight-list {
+                grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+                gap: 30px;
+            }
+            
+            .flight-card {
+                padding: 32px;
+            }
+        }
+
+        /* --- Animation Delays --- */
+        .flight-card:nth-child(1) { animation-delay: 0s; }
+        .flight-card:nth-child(2) { animation-delay: 0.1s; }
+        .flight-card:nth-child(3) { animation-delay: 0.2s; }
+        .flight-card:nth-child(4) { animation-delay: 0.3s; }
+        .flight-card:nth-child(5) { animation-delay: 0.4s; }
+        .flight-card:nth-child(6) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="language-selector">
+            <div class="lang-icon" data-lang="ko" onclick="changeLanguage('ko')">
+            <img src="flags/kr.png" alt="Korean" width="24">
+            </div>
+            <div class="lang-icon" data-lang="en" onclick="changeLanguage('en')">
+            <img src="flags/us.png" alt="English" width="24">
+            </div>
+            <div class="lang-icon" data-lang="ja" onclick="changeLanguage('ja')">
+            <img src="flags/jp.png" alt="Japanese" width="24">
+            </div>
+            <div class="lang-icon" data-lang="zh" onclick="changeLanguage('zh')">
+            <img src="flags/cn.png" alt="Chinese" width="24">
+            </div>
+            <div class="lang-icon" data-lang="es" onclick="changeLanguage('es')">
+            <img src="flags/es.png" alt="Spanish" width="24">
+            </div>
+    </div>
+
+    <div class="container">
+      <header class="header">
+        <h1 data-lang-key="title">지연 항공 목록</h1>
+        <p class="subtitle" data-lang-key="subtitle">운항 정보 변경을 확인하세요!</p>
+      </header>
+
+      <main id="content-area">
+        <div id="loading" class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p data-lang-key="loading">데이터를 불러오는 중...</p>
+        </div>
+
+        <div id="error" class="error-state" style="display: none;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p data-lang-key="error">데이터를 불러오는 중 오류가 발생했습니다.</p>
+        </div>
+
+        <div id="no-data" class="no-data-state" style="display: none;">
+          <p data-lang-key="no_data">현재 지연된 항공편이 없습니다.</p>
+        </div>
+
+        <section id="flight-list" class="flight-list" style="display: none;"></section>
+      </main>
+
+      <footer class="last-updated">
+        <small><span data-lang-key="last_updated">마지막 업데이트:</span> <span id="last-updated-time">-</span></small>
+      </footer>
+    </div>
+
+    <script>
+        // --- Language Translation Script ---
+        const translations = {
+            'ko': {
+                'title': '지연 항공 목록',
+                'subtitle': '운항 정보 변경을 확인하세요!',
+                'loading': '지연 항공 목록을 확인하는 중...',
+                'error': '데이터를 불러오는 중 오류가 발생했습니다.',
+                'no_data': '현재 지연된 항공편이 없습니다.',
+                'last_updated': '마지막 업데이트:',
+                'original_time': '기존 시간',
+                'delayed_time': '예상 변경 시간', /* 문구 수정: 지연 시간 -> 예상 변경 시간 */
+                'destination': '목적지',
+                'gate': '게이트',
+                'status': '상태',
+                'flight_date': '운항 날짜' /* 추가: 운항 날짜 */
+            },
+            'en': {
+                'title': 'Delayed Flights',
+                'subtitle': 'Make sure to change the operation information!',
+                'loading': 'Checking the list of delayed flights...',
+                'error': 'An error occurred while loading data.',
+                'no_data': 'No delayed flights at the moment.',
+                'last_updated': 'Last updated:',
+                'original_time': 'Original Time',
+                'delayed_time': 'Estimated Changed Time', /* 문구 수정 */
+                'destination': 'Destination',
+                'gate': 'Gate',
+                'status': 'Status',
+                'flight_date': 'Flight Date' /* 추가 */
+            },
+            'ja': {
+                'title': '遅延航空機リスト',
+                'subtitle': '運航情報の変更を確認してください！',
+                'loading': '遅延航空機のリストを確認中···',
+                'error': 'データの読み込み中にエラーが発生しました。',
+                'no_data': '現在遅延している航空機はありません。',
+                'last_updated': '最終更新:',
+                'original_time': '元の時間',
+                'delayed_time': '推定変更時間', /* 문구 수정 */
+                'destination': '目的地',
+                'gate': 'ゲート',
+                'status': '状態',
+                'flight_date': '運航日' /* 추가 */
+            },
+            'zh': {
+                'title': '延迟航班列表',
+                'subtitle': '请确认航班信息变更！',
+                'loading': '正在检查延迟航空列表...',
+                'error': '加载数据时发生错误。',
+                'no_data': '目前没有延迟的航班。',
+                'last_updated': '最后更新:',
+                'original_time': '原始时间',
+                'delayed_time': '预计变更时间', /* 문구 수정 */
+                'destination': '目的地',
+                'gate': '登机口',
+                'status': '状态',
+                'flight_date': '航班日期' /* 추가 */
+            },
+            'es': {
+                'title': 'Vuelos Retrasados',
+                'subtitle': '¡Compruebe los cambios en la información de vuelo!',
+                'loading': 'Comprobando la lista de vuelos atrasados...',
+                'error': 'Se produjo un error al cargar los datos.',
+                'no_data': 'No hay vuelos retrasados en este momento.',
+                'last_updated': 'Última actualización:',
+                'original_time': 'Hora Original',
+                'delayed_time': 'Hora Estimada de Cambio', /* 문구 수정 */
+                'destination': 'Destino',
+                'gate': 'Puerta',
+                'status': 'Estado',
+                'flight_date': 'Fecha del Vuelo' /* 추가 */
+            }
+        };
+
+        let currentLanguage = 'ko';
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update all elements with data-lang-key attribute
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Update active state on buttons
+            document.querySelectorAll('.lang-icon').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.lang-icon[data-lang='${lang}']`).classList.add('active');
+
+            // Save language preference
+            localStorage.setItem('airport-lang', lang);
+            
+            // Reload flight data to apply language changes
+            if (window.flightData) {
+                displayFlightData(window.flightData);
+            }
+        }
+
+        // --- Flight Data Management ---
+        let flightData = [];
+
+        async function loadFlightData() {
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/notification');
+                
+                // 응답 상태 확인
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Content-Type 확인
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const textResponse = await response.text();
+                    console.error('Non-JSON response:', textResponse);
+                    throw new Error('서버에서 JSON이 아닌 응답을 받았습니다: ' + textResponse);
+                }
+                
+                const data = await response.json();
+                
+                // 데이터 유효성 확인
+                if (!Array.isArray(data)) {
+                    console.error('Invalid data format:', data);
+                    throw new Error('올바르지 않은 데이터 형식입니다');
+                }
+                
+                console.log('Successfully loaded flight data:', data);
+                window.flightData = data; 
+                displayFlightData(data);
+                updateLastUpdatedTime();
+                
+            } catch (error) {
+                console.error('Error loading flight data:', error);
+                
+                // 에러 타입에 따른 메시지 표시
+                if (error.message.includes('JSON')) {
+                    showError('서버 응답 오류: JSON 형식이 아닙니다');
+                } else if (error.message.includes('HTTP error')) {
+                    showError(`서버 오류: ${error.message}`);
+                } else {
+                    showError('데이터를 불러오는 중 오류가 발생했습니다');
+                }
+            }
+        }
+
+        // `removeDuplicates` 함수는 백엔드에서 처리되므로 제거합니다.
+        // function removeDuplicates(flights) { ... } 
+
+        function displayFlightData(flights) {
+            const flightList = document.getElementById('flight-list');
+            
+            if (flights.length === 0) {
+                showNoData();
+                return;
+            }
+            
+            // 각 카드에 애니메이션 지연을 주기 위해 map 이후 join 전에 설정
+            flightList.innerHTML = flights.map((flight, index) => createFlightCard(flight, index)).join('');
+            showFlightList();
+        }
+
+        function createFlightCard(flight, index) {
+            const originalTimeText = translations[currentLanguage]?.original_time || '기존 시간';
+            const delayedTimeText = translations[currentLanguage]?.delayed_time || '예상 변경 시간';
+            const destinationText = translations[currentLanguage]?.destination || '목적지';
+            const gateText = translations[currentLanguage]?.gate || '게이트';
+            const flightDateText = translations[currentLanguage]?.flight_date || '운항 날짜';
+
+            // 날짜 형식 변환 (YYYYMMDD -> YYYY-MM-DD)
+            const formattedEventDate = flight.eventDate ? 
+                `${String(flight.eventDate).substring(0, 4)}-${String(flight.eventDate).substring(4, 6)}-${String(flight.eventDate).substring(6, 8)}` : '';
+
+            return `
+                <div class="flight-card" style="animation-delay: ${index * 0.1}s;">
+                    <div class="flight-card-header">
+                        <div class="flight-airline-info">
+                            <div class="flight-airline-name">${flight.airline}</div>
+                            <div class="flight-number">${flight.flightId}</div>
+                        </div>
+                        <div class="status-badge">${flight.remark}</div>
+                    </div>
+
+                    <div class="flight-details-grid">
+                        <div class="detail-group">
+                            <div class="detail-label">${destinationText}</div>
+                            <div class="detail-value">${flight.destination}</div>
+                        </div>
+                        <div class="detail-group align-right">
+                            <div class="detail-label">${gateText}</div>
+                            <div class="detail-value">${flight.gatenumber}</div>
+                        </div>
+                    </div>
+
+                    <div class="time-section">
+                        <div class="time-row">
+                            <span class="time-label-small">${flightDateText}</span>
+                            <span class="time-value-large">${formattedEventDate}</span>
+                        </div>
+                        <div class="time-row">
+                            <span class="time-label-small">${originalTimeText}</span>
+                            <span class="time-value-large">${flight.scheduleTimeFormatted}</span>
+                        </div>
+                        <div class="time-row">
+                            <span class="time-label-small">${delayedTimeText}</span>
+                            <span class="time-value-large delayed-time-value">${flight.estimatedTimeFormatted}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- UI State Management ---
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('no-data').style.display = 'none';
+            document.getElementById('flight-list').style.display = 'none';
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('no-data').style.display = 'none';
+            document.getElementById('flight-list').style.display = 'none';
+        }
+
+        function showNoData() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('no-data').style.display = 'block';
+            document.getElementById('flight-list').style.display = 'none';
+        }
+
+        function showFlightList() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('no-data').style.display = 'none';
+            document.getElementById('flight-list').style.display = 'grid'; /* flex 대신 grid로 변경 */
+        }
+
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ko-KR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('last-updated-time').textContent = timeString;
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load saved language preference
+            const savedLang = localStorage.getItem('airport-lang') || 'ko';
+            changeLanguage(savedLang);
+            
+            // Load flight data
+            loadFlightData();
+            
+            // Auto-refresh every 20 minutes (1200000 ms)
+            setInterval(loadFlightData, 1200000); 
+        });
+    </script>
+</body>
+</html>
