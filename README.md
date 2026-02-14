@@ -1,4 +1,5 @@
 # ROAD2AIR (Microsoft Data School 2차 프로젝트)
+> - 📌 **시연영상**: [YouTube 링크](https://youtu.be/01ErQ8CHdbs)  
 ## 🎯 주요 역할
 
 - 데이터 수집 및 임베딩
